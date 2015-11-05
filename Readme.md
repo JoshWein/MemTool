@@ -33,7 +33,7 @@ MemoryAddress Size
 ### Example Snapshot Layout
 
 Explicit 16 16384
-# 11/2/12 - 8:02PM
+\# 11/2/12 - 8:02PM
 0x11e9030 4096
 0x11eA030 3096
 0x11eC030 4096
