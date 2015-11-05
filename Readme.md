@@ -24,17 +24,14 @@ In a GUI environment, this program gives the user the option to load in a file v
 
 The snapshot file should be laid out as follows:
 
+```
 ListType MemoryRowSize HeapSize
-
-\# Time
-
+# Time
 MemoryAddress Size
-
 MemoryAddress Size
-
 MemoryAddress Size
-
 ...
+```
 
 ### Example Snapshot Layout
 
