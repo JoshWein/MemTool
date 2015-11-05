@@ -23,20 +23,20 @@ In a GUI environment, this program gives the user the option to load in a file v
 ## Snapshot Layout
 
 The snapshot file should be laid out as follows:
-ListType MemoryRowSize HeapSize
+```ListType MemoryRowSize HeapSize
 # Time
 MemoryAddress Size
 MemoryAddress Size
 MemoryAddress Size
-...
+...```
 
 ### Example Snapshot Layout
 
-Explicit 16 16384
-\# 11/2/12 - 8:02PM
+```Explicit 16 16384
+# 11/2/12 - 8:02PM
 0x11e9030 4096
 0x11eA030 3096
-0x11eC030 4096
+0x11eC030 4096```
 
 ## In Progress
 
