@@ -15,6 +15,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -24,6 +25,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Reflection;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -46,8 +48,10 @@ public class FXMLDocumentController implements Initializable {
     public static final String SPACEDELIM = "[ ]+";
     public static int memSize, heapSize, heapStart, heapEnd, totalSize, grid;
     public static double blockWidth, blockHeight;  
-    public static boolean error;
-    Rectangle [][] rec;
+    public boolean error;
+    Rectangle [] rec;
+    // Stores the indexes of the first block in ever group
+    public static int[] groupHeads;
 
     /**
      *
@@ -110,7 +114,7 @@ public class FXMLDocumentController implements Initializable {
                 converted += size;
                 size /= memSize;
                 totalSize += size;
-                blockList.add(new Block(size, false, lineTokens[0]));
+                blockList.add(new Block(size, false, lineTokens[0], blockList.size()+1));
                 //System.out.println(converted + " ");
                 if(i != tokens.length-1) {
                     if(converted != Integer.decode(tokens[i+1].split(SPACEDELIM)[0].trim())) {
@@ -119,7 +123,7 @@ public class FXMLDocumentController implements Initializable {
                         size = (Integer.decode(tokens[i+1].split(SPACEDELIM)[0].trim()) - converted);
                         size /= memSize;
                         totalSize += size;
-                        blockList.add(new Block(size, true, "0x" + Integer.toHexString(converted)));
+                        blockList.add(new Block(size, true, "0x" + Integer.toHexString(converted), blockList.size()+1));
                     }
                 }       
             }
@@ -157,9 +161,7 @@ public class FXMLDocumentController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        //ds.setOffsetY(5.0);
-       // ds.setOffsetX(5.0);
-        //ds.setColor(Color.GRAY);
+
     }    
 
 
@@ -188,8 +190,8 @@ public class FXMLDocumentController implements Initializable {
     // Calculate appropriate sized grid for displaying all blocks.
     private void calculateTable() {
         for(grid = 0; grid * grid < totalSize; grid++);
-        System.out.println("Need " + grid + " X " + grid + " size grid");
-        System.out.println("Pane Width: " + this.table.getWidth() + " Pane Height: " + this.table.getHeight());
+        //System.out.println("Need " + grid + " X " + grid + " size grid");
+        //System.out.println("Pane Width: " + this.table.getWidth() + " Pane Height: " + this.table.getHeight());
         blockWidth = this.table.getWidth()/(double)grid;
         blockHeight = this.table.getHeight()/(double)grid;
         // Ensure blocks are always squares and always can fit in the pane
@@ -198,63 +200,117 @@ public class FXMLDocumentController implements Initializable {
         System.out.println("Each block should be " + blockWidth + " by " + blockWidth);
     }
     private void generateSquares() {
-        rec = new Rectangle [grid][grid];
-        for(int i = 0; i < grid; i++)
-            for(int j = 0; j < grid; j++) {
-                rec[i][j] = new Rectangle();
-                rec[i][j].setX(i * blockWidth);
-                rec[i][j].setY(j * blockWidth);
-                rec[i][j].setWidth(blockWidth);
-                rec[i][j].setHeight(blockWidth);
-                rec[i][j].setFill(null);
-                rec[i][j].setStroke(Color.BLACK);
-                //ds.setInput(reflection);    
-                rec[i][j].setEffect(ds);
-                table.getChildren().add(rec[i][j]);
-            }                
+        rec = new Rectangle [grid*grid];
+        for(int i = 0, row = 0, col = 0; i < grid*grid; i++) {
+            rec[i] = new Rectangle();
+            rec[i].setX(col%grid * blockWidth);
+            rec[i].setY((row%grid) * blockWidth);
+            rec[i].setWidth(blockWidth);
+            rec[i].setHeight(blockWidth);
+            rec[i].setFill(null);
+            rec[i].setStroke(Color.BLACK);
+            //ds.setInput(reflection);    
+            rec[i].setEffect(ds);
+            table.getChildren().add(rec[i]);
+            col++;
+            if(col == grid) {
+                col = 0;
+                row++;
+            }      
+        }
+    }
+    
+    // Highlights whole block that is being hovered over
+    void highlightBlock(int i) {
+        int j = groupHeads.length-1;
+        // Find start of block
+        while(groupHeads[j] > i)
+            j--;
+        int k = groupHeads[j];
+        if(j+1 < groupHeads.length)
+            j = groupHeads[j+1];
+        else
+            j = rec.length-1;
+        while(k != j)
+            rec[k++].setStroke(Color.WHITE);
+
+    }
+    
+    void unhighlightBlock(int i) {
+        int j = groupHeads.length-1;
+        // Find start of block
+        while(groupHeads[j] > i)
+            j--;
+        int k = groupHeads[j];
+        if(j+1 < groupHeads.length)
+            j = groupHeads[j+1];
+        else
+            j = rec.length-1;
+        while(k != j)
+            rec[k++].setStroke(Color.BLACK);
     }
     
     private void resizeSquares() {
-        for(int i = 0; i < grid; i++)
-            for(int j = 0; j < grid; j++) {
-                rec[i][j].setX(i * blockWidth);
-                rec[i][j].setY(j * blockWidth);
-                rec[i][j].setWidth(blockWidth);
-                rec[i][j].setHeight(blockWidth);
-                //table.getChildren().add(rec[i][j]);
+        clearLabels();
+        
+        for(int i = 0, row = 0, col = 0; i < grid*grid; i++) {
+            rec[i].setX(col * blockWidth);
+            rec[i].setY(row * blockWidth);
+            rec[i].setWidth(blockWidth);
+            rec[i].setHeight(blockWidth);    
+            col++;
+            if(col == grid) {
+                col = 0;
+                row++;
             }      
+        }
+    }
+    private void clearLabels(){
+        int k = 0;
+        while(k < blockList.size()){
+             table.getChildren().remove(blockList.get(k++).getLabel());
+        }
     }
     private void colorSquares(){
         Block block;
         int i = 0, j = 0, k = 0;
         int currentAddr = heapStart;
         String currentAddrs;
+        groupHeads = new int[blockList.size()];
         while(k < blockList.size()){
+            groupHeads[k] = i;
             block = blockList.get(k);
             int size = block.getSize();
-            while(size != 0) {
+            int tagSize = size * memSize;
+            block.getLabel().setLayoutX(rec[i].getX() + 1);
+            block.getLabel().setLayoutY(rec[i].getY());
+            //table.getChildren().add(block.getLabel());
+            while(size != 0) { 
+                initEventHandler(i);
+                currentAddrs = "Block: " + (k+1) + " Address: 0x" + Integer.toHexString(currentAddr) + " Size: " + tagSize;
                 currentAddr += memSize;
-                currentAddrs = "0x" + Integer.toHexString(currentAddr);
                 if(block.isAllocated()) {
-                    rec[i][j].setFill(Color.RED);
-                    Tooltip.install(rec[i++][j], new Tooltip(currentAddrs));
+                    rec[i].setFill(Color.RED);
+                    Tooltip.install(rec[i++], new Tooltip(currentAddrs));
                 }
                 else {
-                    rec[i][j].setFill(Color.GREEN);
-                    Tooltip.install(rec[i++][j], new Tooltip(currentAddrs));
+                    rec[i].setFill(Color.GREEN);
+                    Tooltip.install(rec[i++], new Tooltip(currentAddrs));
                 }
                 size--;
-                if(i == grid) {
-                    i = 0;
-                    j++;
-                }
             }
             k++;
         }
-         //Tooltip.install(table, t);
-        //rec[0][1].setFill(Color.GREEN);
     }
     
+    private void initEventHandler(int i) {
+        rec[i].setOnMouseEntered((MouseEvent t) -> {
+            highlightBlock(i);
+        });
+        rec[i].setOnMouseExited((MouseEvent t) -> {
+            unhighlightBlock(i);
+        });
+    }
     public void refresh() {
         //table.getChildren().clear();
         if(rec != null) {

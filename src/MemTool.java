@@ -53,6 +53,11 @@ class NonGui {
         System.out.println(PURPLE + "Running Memory Snapshot Visualizer Tool" + RESET);
         System.out.println(GREEN + "GREEN = FREE\n" + RED + "RED = ALLOCATED");
         String content;
+        if(args.length == 0) {
+            System.out.print(RED);
+            System.out.println("ERROR: No argument given");
+            endProgram(1);
+        }
         try {
             content = new String(Files.readAllBytes(Paths.get(args[0])));
             parseFile(content);

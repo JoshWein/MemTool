@@ -1,3 +1,6 @@
+
+import javafx.scene.control.Label;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,10 +15,15 @@ class Block {
     private int size;
     private boolean allocated;
     private String address;
-    Block(int size, boolean allocated, String address) {
+    private Label label;
+    public int startI;
+    public int startJ;
+    Block(int size, boolean allocated, String address, int label) {
         this.size = size;
         this.allocated = allocated;
         this.address = address;
+        this.label = new Label(Integer.toString(label));
+        this.label.setPickOnBounds(true);
     }
 
     /**
@@ -58,5 +66,13 @@ class Block {
      */
     public void setAllocated(boolean allocated) {
         this.allocated = allocated;
+    }
+    
+    public Label getLabel() {
+        return label;
+    }
+    
+    public void setLabel(Label label) {
+        this.label = label;
     }
 }
