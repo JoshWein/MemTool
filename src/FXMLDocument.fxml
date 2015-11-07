@@ -9,7 +9,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" fx:id="root" prefHeight="577.0" prefWidth="713.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FXMLDocumentController">
+<AnchorPane id="AnchorPane" fx:id="root" prefHeight="700.0" prefWidth="885.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="FXMLDocumentController">
     <children>
         <Button fx:id="openFileBtn" layoutX="508.0" layoutY="14.0" onAction="#loadFile" prefHeight="25.0" prefWidth="200.0" text="Upload Snapshot" AnchorPane.rightAnchor="14.0" />
         <Label layoutX="126" layoutY="120" minHeight="16" minWidth="69" />
@@ -18,11 +18,11 @@
             <Font size="16.0" />
          </font>
       </Label>
-      <PieChart layoutX="508.0" layoutY="390.0" prefHeight="0.0" prefWidth="0.0" style="-fx-background-color: grey;" title="External Fragmentation" AnchorPane.bottomAnchor="37.0" AnchorPane.rightAnchor="14.0" />
-      <Label layoutX="508.0" layoutY="124.0" text="Memory Start" AnchorPane.rightAnchor="80.0" />
-      <Label layoutX="508.0" layoutY="142.0" text="Memory End" AnchorPane.rightAnchor="80.0" />
-      <Label layoutX="508.0" layoutY="160.0" text="Heap Size (bytes)" AnchorPane.rightAnchor="80.0" />
-      <Label layoutX="508.0" layoutY="107.0" text="List Type" AnchorPane.rightAnchor="80.0" />
+      <PieChart layoutX="661.0" layoutY="536.0" prefHeight="0.0" prefWidth="0.0" style="-fx-background-color: grey;" title="External Fragmentation" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+      <Label layoutX="508.0" layoutY="124.0" prefHeight="17.0" prefWidth="134.0" text="Memory Start" AnchorPane.rightAnchor="80.0" />
+      <Label layoutX="508.0" layoutY="142.0" prefHeight="17.0" prefWidth="134.0" text="Memory End" AnchorPane.rightAnchor="80.0" />
+      <Label layoutX="508.0" layoutY="160.0" prefHeight="17.0" prefWidth="134.0" text="Heap Size (bytes)" AnchorPane.rightAnchor="80.0" />
+      <Label layoutX="508.0" layoutY="107.0" prefHeight="17.0" prefWidth="134.0" text="List Type" AnchorPane.rightAnchor="80.0" />
       <Label layoutX="508.0" layoutY="178.0" text="Memory Row Size (bytes)" AnchorPane.rightAnchor="80.0" />
       <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#13d305" height="17.0" layoutX="508.0" layoutY="49.0" stroke="BLACK" strokeType="INSIDE" width="17.0" AnchorPane.rightAnchor="197.0" />
       <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#eb0000" height="17.0" layoutX="508.0" layoutY="72.0" stroke="BLACK" strokeType="INSIDE" width="17.0" AnchorPane.rightAnchor="197.0" />
@@ -33,7 +33,7 @@
       <Label fx:id="memEndLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="628.0" layoutY="142.0" prefHeight="17.0" prefWidth="80.0" AnchorPane.rightAnchor="14.0" />
       <Label fx:id="heapSizeLabel" alignment="CENTER_RIGHT" layoutX="628.0" layoutY="160.0" prefHeight="17.0" prefWidth="80.0" textAlignment="RIGHT" AnchorPane.rightAnchor="14.0" />
       <Label fx:id="memRowLabel" alignment="CENTER_RIGHT" layoutX="629.0" layoutY="178.0" prefHeight="17.0" prefWidth="80.0" AnchorPane.rightAnchor="14.0" />
-      <ProgressBar layoutX="508.0" layoutY="547.0" prefWidth="200.0" progress="0.0" AnchorPane.bottomAnchor="12.0" AnchorPane.rightAnchor="14.0" />
       <Pane fx:id="table" layoutX="14.0" layoutY="42.0" prefHeight="522.0" prefWidth="465.0" AnchorPane.bottomAnchor="13.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="228.0" AnchorPane.topAnchor="42.0" />
+      <Separator layoutX="663.0" layoutY="7.0" orientation="VERTICAL" prefHeight="679.0" prefWidth="5.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="216.0" AnchorPane.topAnchor="7.0" />
     </children>
 </AnchorPane>

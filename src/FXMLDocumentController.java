@@ -28,8 +28,12 @@ import javafx.scene.effect.Reflection;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 
 /**
@@ -46,7 +50,7 @@ public class FXMLDocumentController implements Initializable {
     Stage stage;
     // Data for parsing
     public static final String SPACEDELIM = "[ ]+";
-    public static int memSize, heapSize, heapStart, heapEnd, totalSize, grid;
+    public int memSize, heapSize, heapStart, heapEnd, totalSize, grid;
     public static double blockWidth, blockHeight;  
     public boolean error;
     Rectangle [] rec;
@@ -130,7 +134,8 @@ public class FXMLDocumentController implements Initializable {
         }
         if(!error)
             System.out.println("Heap End: 0x" + Integer.toHexString(heapEnd));
-        calculateTable();
+        this.heapSizeLabel.setText(Integer.toString(totalSize*memSize));
+        initTable();
         generateSquares();
         colorSquares();
     }
@@ -155,7 +160,7 @@ public class FXMLDocumentController implements Initializable {
         memSize = Integer.parseInt(tokens[1]);
         this.memRowLabel.setText(Integer.toString(memSize));
         heapSize = Integer.parseInt(tokens[2].trim());
-        this.heapSizeLabel.setText(Integer.toString(heapSize));
+        //this.heapSizeLabel.setText(Integer.toString(heapSize));
         System.out.printf("%-35.35s %-35.35s %s\n", tokens[0].trim(), "Memory Row Size: " + memSize + " bytes", "Total Heap Size: " + heapSize + " bytes");
     }
     
@@ -185,10 +190,9 @@ public class FXMLDocumentController implements Initializable {
         memRowLabel.setText("");
         table.getChildren().clear();
     }
-
-
+    
     // Calculate appropriate sized grid for displaying all blocks.
-    private void calculateTable() {
+    private void initTable() {
         for(grid = 0; grid * grid < totalSize; grid++);
         //System.out.println("Need " + grid + " X " + grid + " size grid");
         //System.out.println("Pane Width: " + this.table.getWidth() + " Pane Height: " + this.table.getHeight());
@@ -197,7 +201,19 @@ public class FXMLDocumentController implements Initializable {
         // Ensure blocks are always squares and always can fit in the pane
         if(blockWidth > blockHeight)
             blockWidth = blockHeight;
-        System.out.println("Each block should be " + blockWidth + " by " + blockWidth);
+        //System.out.println("Each block should be " + blockWidth + " by " + blockWidth);
+    }
+
+    // Calculate appropriate sized grid for displaying all blocks.
+    private void calculateTable() {
+        //System.out.println("Need " + grid + " X " + grid + " size grid");
+        //System.out.println("Pane Width: " + this.table.getWidth() + " Pane Height: " + this.table.getHeight());
+        blockWidth = this.table.getWidth()/(double)grid;
+        blockHeight = this.table.getHeight()/(double)grid;
+        // Ensure blocks are always squares and always can fit in the pane
+        if(blockWidth > blockHeight)
+            blockWidth = blockHeight;
+        //System.out.println("Each block should be " + blockWidth + " by " + blockWidth);
     }
     private void generateSquares() {
         rec = new Rectangle [grid*grid];
@@ -230,7 +246,7 @@ public class FXMLDocumentController implements Initializable {
         if(j+1 < groupHeads.length)
             j = groupHeads[j+1];
         else
-            j = rec.length-1;
+            j = totalSize;
         while(k != j)
             rec[k++].setStroke(Color.WHITE);
 
@@ -245,23 +261,27 @@ public class FXMLDocumentController implements Initializable {
         if(j+1 < groupHeads.length)
             j = groupHeads[j+1];
         else
-            j = rec.length-1;
+            j = totalSize;
         while(k != j)
             rec[k++].setStroke(Color.BLACK);
     }
     
     private void resizeSquares() {
-        clearLabels();
-        
-        for(int i = 0, row = 0, col = 0; i < grid*grid; i++) {
-            rec[i].setX(col * blockWidth);
-            rec[i].setY(row * blockWidth);
+        //clearLabels();
+        int size = grid * grid;
+        double x = 0, y = 0;
+        for(int i = 0, row = 0, col = 0; i < size; i++) {
+            rec[i].setX(x);
+            rec[i].setY(y);
             rec[i].setWidth(blockWidth);
             rec[i].setHeight(blockWidth);    
             col++;
+            x = col * blockWidth;
             if(col == grid) {
                 col = 0;
+                x = 0;
                 row++;
+                y = row * blockWidth;
             }      
         }
     }
@@ -275,7 +295,7 @@ public class FXMLDocumentController implements Initializable {
         Block block;
         int i = 0, j = 0, k = 0;
         int currentAddr = heapStart;
-        String currentAddrs;
+        //String currentAddrs;
         groupHeads = new int[blockList.size()];
         while(k < blockList.size()){
             groupHeads[k] = i;
@@ -285,17 +305,17 @@ public class FXMLDocumentController implements Initializable {
             block.getLabel().setLayoutX(rec[i].getX() + 1);
             block.getLabel().setLayoutY(rec[i].getY());
             //table.getChildren().add(block.getLabel());
-            while(size != 0) { 
-                initEventHandler(i);
-                currentAddrs = "Block: " + (k+1) + " Address: 0x" + Integer.toHexString(currentAddr) + " Size: " + tagSize;
+            while(size != 0) {                 
+                //currentAddrs = "Block: " + (k+1) + " Address: 0x" + Integer.toHexString(currentAddr) + " Size: " + tagSize;
+                initEventHandler(i, "Block: " + (k+1) + " Address: 0x" + Integer.toHexString(currentAddr) + " Size: " + tagSize);
                 currentAddr += memSize;
                 if(block.isAllocated()) {
-                    rec[i].setFill(Color.RED);
-                    Tooltip.install(rec[i++], new Tooltip(currentAddrs));
+                    rec[i++].setFill(Color.RED);
+                    //Tooltip.install(rec[i++], new Tooltip(currentAddrs));
                 }
                 else {
-                    rec[i].setFill(Color.GREEN);
-                    Tooltip.install(rec[i++], new Tooltip(currentAddrs));
+                    rec[i++].setFill(Color.GREEN);
+                    //Tooltip.install(rec[i++], new Tooltip(currentAddrs));
                 }
                 size--;
             }
@@ -303,11 +323,28 @@ public class FXMLDocumentController implements Initializable {
         }
     }
     
-    private void initEventHandler(int i) {
+    private void initEventHandler(int i, String info) {
+            Popup popup = new Popup();
+            Label label = new Label(info);
+            label.setTextFill(Color.web("#E6E6FF"));
+            label.setLayoutX(label.getLayoutX()+10);
+            label.setLayoutY(label.getLayoutY()+5);
+            label.setFont(Font.font("System Regular", 12));
+            Rectangle recty = new Rectangle(220, 30, Color.web("#0C0C0C"));
+            recty.setArcHeight(10);
+            recty.setArcWidth(10);
+            recty.setOpacity(.8);
+            popup.getContent().addAll(recty, label);            
         rec[i].setOnMouseEntered((MouseEvent t) -> {
+            popup.setX(t.getScreenX() + 10);
+            popup.setY(t.getScreenY() + 5);
+            popup.show(stage);
+            recty.setWidth(label.getWidth() + 20);
+            recty.setHeight(label.getHeight() + 10);
             highlightBlock(i);
         });
         rec[i].setOnMouseExited((MouseEvent t) -> {
+            popup.hide();
             unhighlightBlock(i);
         });
     }
@@ -316,7 +353,7 @@ public class FXMLDocumentController implements Initializable {
         if(rec != null) {
             calculateTable();
             resizeSquares();
-            colorSquares();
+            //colorSquares();
         }
     }
 }
