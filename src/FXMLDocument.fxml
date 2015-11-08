@@ -18,7 +18,7 @@
             <Font size="16.0" />
          </font>
       </Label>
-      <PieChart layoutX="661.0" layoutY="536.0" prefHeight="0.0" prefWidth="0.0" style="-fx-background-color: grey;" title="External Fragmentation" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+      <PieChart fx:id="pie" layoutX="661.0" layoutY="441.0" prefHeight="218.0" prefWidth="182.0" style="-fx-background-color: grey;" title="External Fragmentation" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
       <Label layoutX="508.0" layoutY="124.0" prefHeight="17.0" prefWidth="134.0" text="Memory Start" AnchorPane.rightAnchor="80.0" />
       <Label layoutX="508.0" layoutY="142.0" prefHeight="17.0" prefWidth="134.0" text="Memory End" AnchorPane.rightAnchor="80.0" />
       <Label layoutX="508.0" layoutY="160.0" prefHeight="17.0" prefWidth="134.0" text="Heap Size (bytes)" AnchorPane.rightAnchor="80.0" />
