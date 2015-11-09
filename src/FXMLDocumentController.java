@@ -58,6 +58,10 @@ public class FXMLDocumentController implements Initializable {
     public static double blockWidth, blockHeight;  
     public boolean error;
     Rectangle [] rec;
+    Block [][] links;
+    Rectangle recty;
+    Popup popup;
+    Label label;
     // Stores the indexes of the first block in ever group
     public static int[] groupHeads;
 
@@ -76,6 +80,10 @@ public class FXMLDocumentController implements Initializable {
         if(file == null)
             return;
         resetLabels();
+        load(file);
+    }
+    
+    private void load(File file) {
         String content;
         try {
             content = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
@@ -84,7 +92,6 @@ public class FXMLDocumentController implements Initializable {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
     /*
     *   Main file parsing function. Adds given free block to the list first and then sorts and adds appropriate allocated blocks. 
     *   @param content - the file read in
@@ -108,13 +115,6 @@ public class FXMLDocumentController implements Initializable {
                 error("Line " + i + ": There was an issue parsing this line. Check and make sure there are the correct number of arguments");
             } else {
                 // Get starting address to calculate ending address 
-                if(i == 2) {
-                    int converted = Integer.decode(lineTokens[0].trim());
-                    heapStart = converted;
-                    this.memStartLabel.setText("0x" + Integer.toHexString(converted));
-                    heapEnd = converted + heapSize;
-                    this.memEndLabel.setText("0x" + Integer.toHexString(heapEnd));
-                }
                 //System.out.println(lineTokens[0] + " " + lineTokens[1]);
                 int converted = Integer.decode(lineTokens[0].trim());
                 size = Integer.parseInt(lineTokens[1].trim());
@@ -148,6 +148,7 @@ public class FXMLDocumentController implements Initializable {
         generateSquares();
         colorSquares();
         createPie();
+        createRectandPop();
     }
     
     /*
@@ -251,14 +252,36 @@ public class FXMLDocumentController implements Initializable {
         // Find start of block
         while(groupHeads[j] > i)
             j--;
-        int k = groupHeads[j];
+        int k = groupHeads[j], head = groupHeads[j];
         if(j+1 < groupHeads.length)
             j = groupHeads[j+1];
         else
             j = totalSize;
         while(k != j)
             rec[k++].setStroke(Color.WHITE);
-
+        // Find prev and next blocks
+        Block prev = null, next = null;
+        for(int iter = 0; iter < links.length; iter++) {
+            if(links[iter][0].getStart() == head) { // Found link
+                if(iter != 0)
+                    prev = links[iter][1];
+                if(iter != links.length - 1)
+                    next = links[iter][2];
+                break;
+            }
+        }
+        // Highlight previous
+        if(prev != null) {
+            k = prev.getStart();
+            while(k != prev.getEnd())
+                rec[k++].setStroke(Color.ORANGE);
+        }
+        // Highlight next
+        if(next != null) {
+            k = next.getStart();
+            while(k != next.getEnd())
+                rec[k++].setStroke(Color.BLUE);
+        }
     }
     
     void unhighlightBlock(int i) {
@@ -266,13 +289,36 @@ public class FXMLDocumentController implements Initializable {
         // Find start of block
         while(groupHeads[j] > i)
             j--;
-        int k = groupHeads[j];
+        int k = groupHeads[j], head = groupHeads[j];
         if(j+1 < groupHeads.length)
             j = groupHeads[j+1];
         else
             j = totalSize;
         while(k != j)
             rec[k++].setStroke(Color.BLACK);
+        // Find prev and next blocks
+        Block prev = null, next = null;
+        for(int iter = 0; iter < links.length; iter++) {
+            if(links[iter][0].getStart() == head) { // Found link
+                if(iter != 0)
+                    prev = links[iter][1];
+                if(iter != links.length - 1)
+                    next = links[iter][2];
+                break;
+            }
+        }
+        // UnHighlight previous
+        if(prev != null) {
+            k = prev.getStart();
+            while(k != prev.getEnd())
+                rec[k++].setStroke(Color.BLACK);
+        }
+        // UnHighlight next
+        if(next != null) {
+            k = next.getStart();
+            while(k != next.getEnd())
+                rec[k++].setStroke(Color.BLACK);
+        }
     }
     
     private void resizeSquares() {
@@ -304,9 +350,11 @@ public class FXMLDocumentController implements Initializable {
         groupHeads = new int[blockList.size()];
         while(k < blockList.size()){
             groupHeads[k] = i;
+            blockList.get(k).setStart(i);
             //System.out.println(i);
             block = blockList.get(k);
             int size = block.getSize();
+            block.setEnd(block.getStart() + (size));
             int tagSize = size * memSize;
             block.getLabel().setLayoutX(rec[i].getX() + 1);
             block.getLabel().setLayoutY(rec[i].getY());
@@ -330,19 +378,22 @@ public class FXMLDocumentController implements Initializable {
         }
     }
     
+    private void createRectandPop(){
+        recty = new Rectangle(220, 30, Color.web("#0C0C0C"));
+        recty.setArcHeight(10);
+        recty.setArcWidth(10);
+        recty.setOpacity(.8);
+        popup = new Popup();
+        label = new Label();
+        label.setTextFill(Color.web("#E6E6FF"));
+        label.setLayoutX(label.getLayoutX()+10);
+        label.setLayoutY(label.getLayoutY()+5);
+        label.setFont(Font.font("System Regular", 12));
+        popup.getContent().addAll(recty, label); 
+    }
     private void initEventHandler(int i, String info) {
-            Popup popup = new Popup();
-            Label label = new Label(info);
-            label.setTextFill(Color.web("#E6E6FF"));
-            label.setLayoutX(label.getLayoutX()+10);
-            label.setLayoutY(label.getLayoutY()+5);
-            label.setFont(Font.font("System Regular", 12));
-            Rectangle recty = new Rectangle(220, 30, Color.web("#0C0C0C"));
-            recty.setArcHeight(10);
-            recty.setArcWidth(10);
-            recty.setOpacity(.8);
-            popup.getContent().addAll(recty, label);            
         rec[i].setOnMouseEntered((MouseEvent t) -> {
+            label.setText(info);
             popup.setX(t.getScreenX() + 10);
             popup.setY(t.getScreenY() + 5);
             popup.show(stage);
@@ -413,7 +464,16 @@ public class FXMLDocumentController implements Initializable {
     }
 
     // Sorts given list of blocks from lowest memory address to highest
+    // Also creates a list of links
     private void sortFree(LinkedList<Block> blockList) {
+        links = new Block[blockList.size()][3];
+        for(int i = 0; i < blockList.size(); i++) {
+            links[i][0] = blockList.get(i);
+            if(i != 0)
+                links[i][1] = blockList.get(i-1);
+            if(i != blockList.size()-1)
+                links[i][2] = blockList.get(i+1);
+        }
         Collections.sort(blockList, new BlockComp());
     }
     
@@ -448,7 +508,13 @@ public class FXMLDocumentController implements Initializable {
             allocatedSize += size;
             addBlock(size, true, "0x" + Integer.toHexString(Integer.decode(blockList.get(blockList.size()-1).getAddress()) + (blockList.get(blockList.size()-1).getSize()*memSize)), blockList.size()+1, -1);
         }
-        // Set heap size label
-        this.heapSizeLabel.setText(Integer.toString(totalSize*memSize));
+        // Set labels
+        int converted = Integer.decode(blockList.get(0).getAddress());
+        heapStart = converted;
+        this.memStartLabel.setText("0x" + Integer.toHexString(converted));
+        heapSize = totalSize*memSize;
+        heapEnd = converted + heapSize;
+        this.memEndLabel.setText("0x" + Integer.toHexString(heapEnd));
+        this.heapSizeLabel.setText(Integer.toString(heapSize));
     }
 }

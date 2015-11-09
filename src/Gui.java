@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 public class Gui extends Application {
     @Override
     public void start(Stage stage) throws Exception {
+        setUserAgentStylesheet(STYLESHEET_MODENA);
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("FXMLDocument.fxml"));
         Parent root = fxmlLoader.load();
         FXMLDocumentController controller = fxmlLoader.<FXMLDocumentController>getController();

@@ -17,6 +17,7 @@ public class Block {
     private String address;
     private Label label;
     private int end;
+    private int start;
     Block(int size, boolean allocated, String address, int label, int memSize) {
         this.size = size;
         this.allocated = allocated;
@@ -87,5 +88,19 @@ public class Block {
      */
     public void setEnd(int end) {
         this.end = end;
+    }
+
+    /**
+     * @return the start
+     */
+    public int getStart() {
+        return start;
+    }
+
+    /**
+     * @param start the start to set
+     */
+    public void setStart(int start) {
+        this.start = start;
     }
 }
