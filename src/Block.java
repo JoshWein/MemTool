@@ -11,19 +11,18 @@ import javafx.scene.control.Label;
  *
  * @author josh
  */
-class Block {
+public class Block {
     private int size;
     private boolean allocated;
     private String address;
     private Label label;
-    public int startI;
-    public int startJ;
-    Block(int size, boolean allocated, String address, int label) {
+    private int end;
+    Block(int size, boolean allocated, String address, int label, int memSize) {
         this.size = size;
         this.allocated = allocated;
         this.address = address;
         this.label = new Label(Integer.toString(label));
-        this.label.setPickOnBounds(true);
+        this.end = Integer.decode(address) + (size * memSize);
     }
 
     /**
@@ -74,5 +73,19 @@ class Block {
     
     public void setLabel(Label label) {
         this.label = label;
+    }
+
+    /**
+     * @return the end
+     */
+    public int getEnd() {
+        return end;
+    }
+
+    /**
+     * @param end the end to set
+     */
+    public void setEnd(int end) {
+        this.end = end;
     }
 }
