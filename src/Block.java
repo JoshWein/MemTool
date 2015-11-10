@@ -12,18 +12,17 @@ import javafx.scene.control.Label;
  * @author josh
  */
 public class Block {
-    private int size;
+    private int size, end, start, internFrag;
     private boolean allocated;
     private String address;
     private Label label;
-    private int end;
-    private int start;
-    Block(int size, boolean allocated, String address, int label, int memSize) {
+    Block(int size, boolean allocated, String address, int label, int internFrag, int memSize) {
         this.size = size;
         this.allocated = allocated;
         this.address = address;
         this.label = new Label(Integer.toString(label));
         this.end = Integer.decode(address) + (size * memSize);
+        this.internFrag = internFrag;
     }
 
     /**
@@ -102,5 +101,19 @@ public class Block {
      */
     public void setStart(int start) {
         this.start = start;
+    }
+
+    /**
+     * @return the internFrag
+     */
+    public int getInternFrag() {
+        return internFrag;
+    }
+
+    /**
+     * @param internFrag the internFrag to set
+     */
+    public void setInternFrag(int internFrag) {
+        this.internFrag = internFrag;
     }
 }
