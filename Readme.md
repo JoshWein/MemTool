@@ -24,7 +24,7 @@ In a GUI environment, this program gives the user the option to load in a file v
 
 When hovering over a specific section, the previous and next sections will be higlighted orange and blue respectively.
 
-For all lists the application calculates external fragmentation and displays it in a pie chart. For a Full Memory Information list the application also calculates internal fragmentation and displays the total amount in a seperate pie chart based off of extra information. See [sample layout](#Full-Memory-Information-Snapshot-Layout).
+For all lists the application calculates external fragmentation and displays it in a pie chart. For a Full Memory Information list the application also calculates internal fragmentation and displays the total amount in a seperate pie chart based off of extra information. See [sample layout](#full-memory-information-snapshot-layout).
 
 ## Explicit/Implicit Freelist Snapshot Layout
 
