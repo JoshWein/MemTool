@@ -78,6 +78,7 @@ AllocatedMemoryAddress 	Size 	RequestedSize
 
 ### Example Full Memory Information Snapshot Layout
 
+```
 Implicit 16 4608
 # 11/2/12 - 8:02PM
 0x11e9430 256 128
@@ -88,7 +89,7 @@ Implicit 16 4608
 0x11e9030 256 200
 0x11e9A30 128 100
 0x11e9630 256 200
-
+```
 
 ## Requirements Fullfillment
 
