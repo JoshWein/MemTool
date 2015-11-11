@@ -5,11 +5,9 @@
  */
 
 
-import java.io.File;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -31,17 +29,17 @@ public class Gui extends Application {
         FXMLDocumentController controller = fxmlLoader.<FXMLDocumentController>getController();
         controller.setStage(stage);
         Scene scene = new Scene(root);
-        scene.widthProperty().addListener(new ChangeListener(){
-        @Override public void changed(ObservableValue o,Object oldVal, 
-                 Object newVal){
-             controller.refresh();
-        }
+        scene.widthProperty().addListener(new ChangeListener<Number>(){
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                controller.refresh();
+            }
       });
-        scene.heightProperty().addListener(new ChangeListener(){
-        @Override public void changed(ObservableValue o,Object oldVal, 
-                 Object newVal){
-             controller.refresh();
-        }
+        scene.heightProperty().addListener(new ChangeListener<Number>(){
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                controller.refresh();
+            }
       });
         
         scene.setOnDragOver((DragEvent event) -> {
