@@ -5,12 +5,17 @@
  */
 
 
+import java.io.File;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.stage.Stage;
 
 /**
@@ -38,6 +43,25 @@ public class Gui extends Application {
              controller.refresh();
         }
       });
+        
+        scene.setOnDragOver((DragEvent event) -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasFiles()) {
+                event.acceptTransferModes(TransferMode.COPY);
+            } else {
+                event.consume();
+            }
+        });
+         scene.setOnDragDropped((DragEvent event) -> {
+             Dragboard db = event.getDragboard();
+             boolean success = false;
+             if (db.hasFiles()) {
+                 success = true;
+                 controller.load(db.getFiles().get(0));
+             }
+             event.setDropCompleted(success);
+             event.consume();
+        });
         stage.setScene(scene);
         stage.show();
     }

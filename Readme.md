@@ -14,17 +14,17 @@ To run, simply run ```MemTool.jar mysnapshot.txt``` and make sure to have the co
 
 In a NonGUI environment, this program takes the file as a command line argument and outputs the data in a basic format colouring the words to designate free and allocated blocks.
 
-This version of the program only runs a very basic analyzation of an explicit free list, for all other functionality, run the GUI version.
+This version of the program only runs a very basic visualization of a sorted explicit free list, for all other functionality such as fragmentation and link display, run the GUI version.
 
 ## GUI
 
 To run, run MemTool.jar and click "Upload Snapshot" to choose a file to upload.
 
-In a GUI environment, this program gives the user the option to load in a file via button press. The application renders the data using blocks colored green and red to distinguish between free and allocated blocks. Each block represents one row of memory. By hovering the mouse over a block you can see the starting memory address of that specific block and the sections total size. You can resize the application to make the squares bigger as well as load in a new file simply by clicking "Upload Snapshot" button.
+In a GUI environment, this program gives the user the option to load in a file via button press or by simply dragging and dropping the file into the application. The application renders the data using blocks colored green and red to distinguish between free and allocated blocks. Each block represents one row of memory. By hovering the mouse over a block you can see the starting memory address of that specific block and the sections total size. You can resize the application to make the squares bigger as well as load in a new file simply by clicking "Upload Snapshot" button.
 
 When hovering over a specific section, the previous and next sections will be higlighted orange and blue respectively.
 
-For all lists the application calculates external fragmentation and displays it in a pie chart. For a Full Memory Information list the application also calculates internal fragmentation and displays the total amount in a seperate pie chart based off of extra information. See [sample layout](#full-memory-information-snapshot-layout).
+For all lists the application calculates external fragmentation and displays it in a pie chart. For a Full Memory Information list the application also calculates internal fragmentation and displays the total amount in a seperate pie chart as well as internal fragmentation for each individual section based off of extra information. See [sample layout](#full-memory-information-snapshot-layout).
 
 ## Explicit/Implicit Freelist Snapshot Layout
 
@@ -91,7 +91,7 @@ Implicit 16 4608
 0x11e9630 256 200
 ```
 
-## Requirements Fullfillment
+## Requirements Fulfillment
 
 ### Minimum visual requirements (30 pts):
 
@@ -117,8 +117,17 @@ Starting address of each allocated or free region of memory
 * Create a input format for implicit allocators and/or full memory information (free and allocated blocks) using the HW3 format as a starting point.
   * Explicit format works for implicit lists.
 * Calculate and display the amount of internal fragmentation.
-  * Full Memory Information lists will display Requested vs. Recieved for internal fragmentation as a pie chart in the sidebar.
+  * Full Memory Information lists will display Requested vs. Received for internal fragmentation as a pie chart in the sidebar.
   * Requested percentage is how much of the allocated space was used.
-  * Recieved percentage is the leftover space ie. internal fragmentation.
+  * Received percentage is the leftover space ie. internal fragmentation.
 * Mark/color/etc the internal fragmentation in each block.
+  * Full Memory Information lists calculate the internal fragmentation in each block and colors in the blocks a lighter red the more fragmentation there is. The exact percentage is displayed when hovering over the blocks.
 
+## Performance - Average of 10
+* 2000 	  bytes 		- 2ms
+* 5000 	  bytes 		- 2ms
+* 10000   bytes 		- 3ms
+* 50000   bytes 		- 12ms
+* 100000  bytes 		- 23ms
+* 1048576 bytes [1MB] 	- 268ms
+* 5242880 bytes [5MB] 	- 2684ms

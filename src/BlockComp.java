@@ -1,15 +1,9 @@
 
 import java.util.Comparator;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- *
- * @author Josh
+ * Used for sorting lists of Blocks by address.
+ * @author Josh Wein
  */
 public class BlockComp implements Comparator<Block>{
 

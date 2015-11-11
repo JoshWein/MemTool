@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -25,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.DropShadow;
@@ -46,7 +41,9 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     Parent root;
     @FXML
-    private Label listTypeLabel, memStartLabel, memEndLabel, heapSizeLabel, memRowLabel;
+    Button openFileBtn;
+    @FXML
+    private Label listTypeLabel, memStartLabel, memEndLabel, heapSizeLabel, memRowLabel, prevLabel, nextLabel;
     @FXML
     private Pane table;
     @FXML
@@ -54,7 +51,7 @@ public class FXMLDocumentController implements Initializable {
     Stage stage;
     // Data for parsing
     public static final String SPACEDELIM = "[ ]+";
-    public int memSize, heapSize, heapStart, heapEnd, totalSize, grid, allocatedSize, freeSize, requested, recieved;
+    public int memSize, heapSize, heapStart, heapEnd, totalSize, grid, allocatedSize, freeSize, requested, received;
     public static double blockWidth, blockHeight;  
     public boolean full, error;
     Rectangle [] rec;
@@ -74,21 +71,26 @@ public class FXMLDocumentController implements Initializable {
     
     @FXML
     private void loadFile(ActionEvent event) {
+        openFileBtn.setDisable(true);
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Resource File");
         File file = fileChooser.showOpenDialog(stage);
-        if(file == null)
+        if(file == null) {
+            openFileBtn.setDisable(false);
             return;
-        resetLabels();
+        }
         load(file);
     }
     
-    private void load(File file) {
+    public void load(File file) {
+        resetLabels();
+        openFileBtn.setDisable(true);
         String content;
         try {
-            content = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));
+            content = new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())));          
             parseFile(content);
         } catch (IOException ex) {
+            openFileBtn.setDisable(false);
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -108,7 +110,7 @@ public class FXMLDocumentController implements Initializable {
         blockList = new LinkedList<>();
         // Go through each line one by and and display memory information
         int size;
-        totalSize = 0; freeSize = 0; allocatedSize = 0; requested = 0; recieved = 0;
+        totalSize = 0; freeSize = 0; allocatedSize = 0; requested = 0; received = 0; full = false;
         for(int i = 2; i < tokens.length && !error; i++) {
             String[] lineTokens = tokens[i].split(SPACEDELIM);
             if(lineTokens.length != 2 && lineTokens.length != 3) {
@@ -121,29 +123,28 @@ public class FXMLDocumentController implements Initializable {
                 if(lineTokens.length == 3) { // This means it's full memory information.
                     full = true; 
                     requested += Integer.parseInt(lineTokens[2].trim());
-                    recieved += size*memSize;
+                    received += size*memSize;
                     int internFrag = Integer.parseInt(lineTokens[2].trim());
                     allocatedSize += size;
-                    addBlock(size, true, lineTokens[0], blockList.size()+1, (size*memSize) - internFrag, -1);
+                    addBlock(size, true, lineTokens[0], blockList.size()+1, 100 - (int)Math.round((double)internFrag/(double)(size*memSize)*100), -1);
                 } else {
                     addBlock(size, false, lineTokens[0], blockList.size()+1, 0, -1);  
                 }
             }
         }
         if(!error) {
-            System.out.println("Heap End: 0x" + Integer.toHexString(heapEnd));
             // Sort free blocks
             sortFree(blockList);
             // Insert allocated blocks
-            if(!full)
-                fixList(blockList);
-            printBlocks();
+            fixList(blockList);
             initTable();
             generateSquares();
             colorSquares();
             createPie();
             createRectandPop();
+            openFileBtn.setDisable(false);
         }
+        openFileBtn.setDisable(false);
     }
     
     /*
@@ -158,19 +159,29 @@ public class FXMLDocumentController implements Initializable {
             return;
         }
         // Parse and print first line
-        if(tokens[0].toUpperCase().equals("EXPLICIT")) {            
-            this.listTypeLabel.setText("Explicit");
-        } else if (tokens[0].toUpperCase().equals("IMPLICIT")) {
-            this.listTypeLabel.setText("Implicit");
-        } else {
-            error("Line 1: Visualizer only supports explicit free lists. The given freelist type does not match.");
-            return;
+        switch (tokens[0].toUpperCase()) {
+            case "EXPLICIT":
+                this.listTypeLabel.setText("Explicit");
+                this.prevLabel.setText("Previous Free Block");
+                this.nextLabel.setText("Next Free Block");
+                break;
+            case "IMPLICIT":
+                this.listTypeLabel.setText("Implicit");
+                this.prevLabel.setText("Previous Free Block");
+                this.nextLabel.setText("Next Free Block");
+                break;
+            case "FULL":
+                this.listTypeLabel.setText("Full");
+                 this.prevLabel.setText("Previous Block");
+                this.nextLabel.setText("Next Block");
+                break;
+            default:
+                error("Line 1: Visualizer only supports explicit free lists. The given freelist type does not match.");
+                return;
         }
         memSize = Integer.parseInt(tokens[1]);
         this.memRowLabel.setText(Integer.toString(memSize));
         heapSize = Integer.parseInt(tokens[2].trim());
-        //this.heapSizeLabel.setText(Integer.toString(heapSize));
-        System.out.printf("%-35.35s %-35.35s %s\n", tokens[0].trim(), "Memory Row Size: " + memSize + " bytes", "Total Heap Size: " + heapSize + " bytes");
     }
     
     @Override
@@ -189,6 +200,7 @@ public class FXMLDocumentController implements Initializable {
         Alert alert = new Alert(AlertType.ERROR, error);
         alert.showAndWait();
         resetLabels();
+        openFileBtn.setDisable(false);
     }
     
     private void resetLabels() {
@@ -203,14 +215,11 @@ public class FXMLDocumentController implements Initializable {
     // Calculate appropriate sized grid for displaying all blocks.
     private void initTable() {
         for(grid = 0; grid * grid < totalSize; grid++);
-        //System.out.println("Need " + grid + " X " + grid + " size grid");
-        //System.out.println("Pane Width: " + this.table.getWidth() + " Pane Height: " + this.table.getHeight());
         blockWidth = this.table.getWidth()/(double)grid;
         blockHeight = this.table.getHeight()/(double)grid;
         // Ensure blocks are always squares and always can fit in the pane
         if(blockWidth > blockHeight)
             blockWidth = blockHeight;
-        //System.out.println("Each block should be " + blockWidth + " by " + blockWidth);
     }
 
     // Calculate appropriate sized grid for displaying all blocks.
@@ -223,7 +232,6 @@ public class FXMLDocumentController implements Initializable {
     }
     private void generateSquares() {
         rec = new Rectangle [grid*grid];
-        System.out.println(grid);
         for(int i = 0, row = 0, col = 0; i < grid*grid; i++) {
             rec[i] = new Rectangle();
             rec[i].setX(col%grid * blockWidth);
@@ -231,8 +239,7 @@ public class FXMLDocumentController implements Initializable {
             rec[i].setWidth(blockWidth);
             rec[i].setHeight(blockWidth);
             rec[i].setFill(null);
-            rec[i].setStroke(Color.BLACK);
-            //ds.setInput(reflection);                
+            rec[i].setStroke(Color.BLACK);             
             if(grid <= 40)
                 rec[i].setEffect(ds);
             table.getChildren().add(rec[i]);
@@ -305,13 +312,13 @@ public class FXMLDocumentController implements Initializable {
                 break;
             }
         }
-        // UnHighlight previous
+        // Unhighlight previous
         if(prev != null) {
             k = prev.getStart();
             while(k != prev.getEnd())
                 rec[k++].setStroke(Color.BLACK);
         }
-        // UnHighlight next
+        // Unhighlight next
         if(next != null) {
             k = next.getStart();
             while(k != next.getEnd())
@@ -320,7 +327,6 @@ public class FXMLDocumentController implements Initializable {
     }
     
     private void resizeSquares() {
-        //clearLabels();
         int size = grid * grid;
         double x = 0, y = 0;
         for(int i = 0, row = 0, col = 0; i < size; i++) {
@@ -349,26 +355,23 @@ public class FXMLDocumentController implements Initializable {
         while(k < blockList.size()){
             groupHeads[k] = i;
             blockList.get(k).setStart(i);
-            //System.out.println(i);
             block = blockList.get(k);
             int size = block.getSize();
             block.setEnd(block.getStart() + (size));
             int tagSize = size * memSize;
             block.getLabel().setLayoutX(rec[i].getX() + 1);
             block.getLabel().setLayoutY(rec[i].getY());
-            //table.getChildren().add(block.getLabel());
-            //System.out.println(size);
             while(size != 0) {                 
-                //currentAddrs = "Block: " + (k+1) + " Address: 0x" + Integer.toHexString(currentAddr) + " Size: " + tagSize;
-                initEventHandler(i, "Block: " + (k+1) + " Address: 0x" + Integer.toHexString(currentAddr) + " Size: " + tagSize);
+                if(full)
+                    initEventHandler(i, "Block: " + (k+1) + " Address: 0x" + Integer.toHexString(currentAddr) + " Size: " + tagSize + " Internal Fragmentation: " + block.getInternFrag() + "%");
+                else
+                    initEventHandler(i, "Block: " + (k+1) + " Address: 0x" + Integer.toHexString(currentAddr) + " Size: " + tagSize);
                 currentAddr += memSize;
                 if(block.isAllocated()) {
-                    rec[i++].setFill(Color.web("#800000"));
-                    //Tooltip.install(rec[i++], new Tooltip(currentAddrs));
+                    rec[i++].setFill(Color.rgb(128,block.getInternFrag()/2, block.getInternFrag()/2));
                 }
                 else {
                     rec[i++].setFill(Color.GREEN);
-                    //Tooltip.install(rec[i++], new Tooltip(currentAddrs));
                 }
                 size--;
             }
@@ -412,6 +415,7 @@ public class FXMLDocumentController implements Initializable {
     }
 
     private void createPie() {
+        pie1.setVisible(full);
         ObservableList<PieChart.Data> pieChartData =
                 FXCollections.observableArrayList(
                 new PieChart.Data("Free", (((double)totalSize - (double)allocatedSize)/(double)totalSize* 100)),
@@ -424,14 +428,14 @@ public class FXMLDocumentController implements Initializable {
         Set<Node> items = pie.lookupAll("Label.chart-legend-item");
         int i = 0;
         Color[] colors = { Color.web("GREEN"), Color.web("#800000")};
+        Label blabel;
         for (Node item : items) {
-          Label label = (Label) item;
+          blabel = (Label) item;
           final Rectangle rectangle = new Rectangle(10, 10, colors[i]);
-          label.setGraphic(rectangle);
+          blabel.setGraphic(rectangle);
           i++;
         }
         for (final PieChart.Data data : pie.getData()) {
-            //System.out.println(data.getPieValue());
             Tooltip.install(data.getNode(), new Tooltip(Math.round(data.getPieValue()) + "%"));
             data.getNode().setOnMouseEntered((MouseEvent event) -> {
                 data.getNode().setScaleX(1.1);
@@ -443,11 +447,11 @@ public class FXMLDocumentController implements Initializable {
             });
         }
         if(full) {
-            double percent = ((double)requested/(double)recieved) * 100;
+            double percent = ((double)requested/(double)received) * 100;
             pieChartData =
                 FXCollections.observableArrayList(
                 new PieChart.Data("Requested", percent),
-                new PieChart.Data("Recieved", 100 - percent));
+                new PieChart.Data("Received", 100 - percent));
         pie1.setData(pieChartData);
         pie1.setStartAngle(30);
         pie1.getData().get(0).getNode().setStyle("-fx-pie-color: GREEN");
@@ -456,13 +460,12 @@ public class FXMLDocumentController implements Initializable {
         items = pie1.lookupAll("Label.chart-legend-item");
         i = 0;
         for (Node item : items) {
-          Label label = (Label) item;
+          blabel = (Label) item;
           final Rectangle rectangle = new Rectangle(10, 10, colors[i]);
-          label.setGraphic(rectangle);
+          blabel.setGraphic(rectangle);
           i++;
         }
         for (final PieChart.Data data : pie1.getData()) {
-            //System.out.println(data.getPieValue());
             Tooltip.install(data.getNode(), new Tooltip(Math.round(data.getPieValue()) + "%"));
             data.getNode().setOnMouseEntered((MouseEvent event) -> {
                 data.getNode().setScaleX(1.1);
@@ -515,28 +518,27 @@ public class FXMLDocumentController implements Initializable {
     *   @param memSize: memory row size
     */
     private void fixList(LinkedList<Block> blockList) {
-        int size;
-        // See if we need to add an allocated block before all free blocks.
-        // Check through the list
-        for(int i = 0; i < blockList.size() - 1; i++) {
-            if(blockList.get(i).getEnd() != Integer.decode(blockList.get(i+1).getAddress())){
-                //System.out.println(Integer.decode(blockList.get(i+1).getAddress()) - blockList.get(i).getEnd());
-                size = Integer.decode(blockList.get(i+1).getAddress()) - blockList.get(i).getEnd();
+        if(!full) {
+            int size;
+            // See if we need to add an allocated block before all free blocks.
+            // Check through the list
+            for(int i = 0; i < blockList.size() - 1; i++) {
+                if(blockList.get(i).getEnd() != Integer.decode(blockList.get(i+1).getAddress())){
+                    size = Integer.decode(blockList.get(i+1).getAddress()) - blockList.get(i).getEnd();
+                    size /= memSize;
+                    totalSize += size;
+                    allocatedSize += size;
+                    addBlock(size, true, "0x" + Integer.toHexString(blockList.get(i).getEnd()), blockList.size()+1, 0, i+1);
+                }
+            }
+            // See if we need to add an allocated block at the end
+            if(totalSize < heapSize) {
+                size = heapSize - (totalSize*memSize);
                 size /= memSize;
                 totalSize += size;
                 allocatedSize += size;
-                addBlock(size, true, "0x" + Integer.toHexString(blockList.get(i).getEnd()), blockList.size()+1, 0, i+1);
+                addBlock(size, true, "0x" + Integer.toHexString(Integer.decode(blockList.get(blockList.size()-1).getAddress()) + (blockList.get(blockList.size()-1).getSize()*memSize)), blockList.size()+1, 0, -1);
             }
-            System.out.println(totalSize*memSize + " " + allocatedSize + " " + heapSize);
-        }
-        // See if we need to add an allocated block at the end
-        if(totalSize < heapSize) {
-            size = heapSize - (totalSize*memSize);
-            //System.out.println("0x" + Integer.toHexString(Integer.decode(blockList.get(blockList.size()-1).getAddress()) + (blockList.get(blockList.size()-1).getSize()*memSize)) + " " + size);
-            size /= memSize;
-            totalSize += size;
-            allocatedSize += size;
-            addBlock(size, true, "0x" + Integer.toHexString(Integer.decode(blockList.get(blockList.size()-1).getAddress()) + (blockList.get(blockList.size()-1).getSize()*memSize)), blockList.size()+1, 0, -1);
         }
         // Set labels
         int converted = Integer.decode(blockList.get(0).getAddress());
