@@ -20,7 +20,7 @@ This version of the program only runs a very basic visualization of a sorted exp
 
 ## GUI
 
-To run, run MemTool.jar and click "Upload Snapshot" to choose a file to upload.
+To run, run MemTool.jar and click "Upload Snapshot" to choose a file to upload or drag the desired file into the application.
 
 In a GUI environment, this program gives the user the option to load in a file via button press or by simply dragging and dropping the file into the application. The application renders the data using blocks colored green and red to distinguish between free and allocated blocks. Each block represents one row of memory. By hovering the mouse over a block you can see the starting memory address of that specific block and the sections total size. You can resize the application to make the squares bigger as well as load in a new file simply by clicking "Upload Snapshot" button.
 
