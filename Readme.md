@@ -10,8 +10,9 @@ This program requires Java 1.8 on any system it runs on GUI or NonGUI.
 
 ## NonGUI
 
-Setup: ```javac MemTool.java
-To run, simply run ```MemTool.jar mysnapshot.txt``` and make sure to have the command line argument pointing towards the snapshot you want to analyze.
+Setup: ```javac MemTool.java```
+
+To run, simply run ```java MemTool mysnapshot.txt``` and make sure to have the command line argument pointing towards the snapshot you want to analyze.
 
 In a NonGUI environment, this program takes the file as a command line argument and outputs the data in a basic format colouring the words to designate free and allocated blocks.
 
