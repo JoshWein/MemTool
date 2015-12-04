@@ -11,6 +11,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -18,7 +19,7 @@ import javafx.stage.Stage;
 
 /**
  *
- * @author josh
+ * @author 
  */
 public class Gui extends Application {
     @Override
@@ -28,19 +29,15 @@ public class Gui extends Application {
         Parent root = fxmlLoader.load();
         FXMLDocumentController controller = fxmlLoader.<FXMLDocumentController>getController();
         controller.setStage(stage);
+        stage.setTitle("Memory Snapshot Visualizer Tool");
+        stage.getIcons().add(new Image("icon.png"));
         Scene scene = new Scene(root);
-        scene.widthProperty().addListener(new ChangeListener<Number>(){
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                controller.refresh();
-            }
-      });
-        scene.heightProperty().addListener(new ChangeListener<Number>(){
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                controller.refresh();
-            }
-      });
+        scene.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            controller.refresh();
+        });
+        scene.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            controller.refresh();
+        });
         
         scene.setOnDragOver((DragEvent event) -> {
             Dragboard db = event.getDragboard();

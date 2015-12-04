@@ -186,7 +186,12 @@ public class FXMLDocumentController implements Initializable {
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        openFileBtn.setOnMouseEntered((MouseEvent t) -> {
+            openFileBtn.setStyle("-fx-background-color: #c3c4c4,        linear-gradient(#d6d6d6 50%, white 100%),        radial-gradient(center 50% -40%, radius 200%, #e6e6e6 45%, rgba(230,230,230,0) 50%); -fx-text-fill: black; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 3, 0.0 , 0 , 1 );");
+        });
+        openFileBtn.setOnMouseExited((MouseEvent t) -> {
+            openFileBtn.setStyle("-fx-background-color: #c3c4c4,        linear-gradient(white 50%, #d6d6d6 100%),        radial-gradient(center 50% -40%, radius 200%, rgba(230,230,230,0) 45%, #e6e6e6 50%); -fx-text-fill: black; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 3, 0.0 , 0 , 1 );");
+        });
     }    
 
 
